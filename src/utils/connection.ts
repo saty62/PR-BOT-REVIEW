@@ -1,11 +1,12 @@
 import "dotenv/config";
-import { Redis } from "ioredis";
 
-if (!process.env.REDIS_URL) {
+const redisUrl = process.env.REDIS_URL?.trim();
+
+if (!redisUrl) {
   throw new Error("REDIS_URL is missing");
 }
 
 export const connection = {
-  url: process.env.REDIS_URL!,
-  maxRetriesPerRequest: null, 
+  url: redisUrl,
+  maxRetriesPerRequest: null,
 };

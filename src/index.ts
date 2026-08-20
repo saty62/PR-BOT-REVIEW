@@ -10,7 +10,7 @@ import { startPRReviewWorker } from "./worker/worker.js";
 import { reviewQueue } from "./queue/queue.js";
 import { log } from "console";
 
-const app = fastify();
+const app = fastify();//create the server
 const port = Number(process.env.PORT ?? 3000);
 
 // Initialize webhook

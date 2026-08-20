@@ -12,9 +12,10 @@ export function startPRReviewWorker() {
     "pr-review",
     async (job) => {
       console.log("========================================");
-      console.log("Worker received job");
+      console.log("JOB RECEIVED");
       console.log("Job ID:", job.id);
-      console.log("Job data:", job.data);
+      console.log("Job Name:", job.name);
+      console.log("Job Data:", job.data);
       console.log("========================================");
 
       try {
@@ -24,12 +25,6 @@ export function startPRReviewWorker() {
           prNumber,
           installationId,
         } = job.data;
-
-        if (!owner || !repo || !prNumber || !installationId) {
-          throw new Error(
-            `Invalid job data: ${JSON.stringify(job.data)}`
-          );
-        }
 
         console.log("Getting GitHub installation client...");
 
@@ -53,7 +48,7 @@ export function startPRReviewWorker() {
 
         console.log("Patches fetched successfully");
 
-        console.log("Sending patches to Gemini for review...");
+        console.log("Sending patches to AI...");
 
         const reviewText = await aiReview(patches);
 
@@ -75,15 +70,9 @@ export function startPRReviewWorker() {
           success: true,
           prNumber,
         };
-      } catch (error) {
-        console.error(
-          `Worker failed for job ${job.id}:`,
-          error
-        );
-
-        // Very important:
-        // Throwing makes BullMQ mark the job as failed.
-        throw error;
+      } catch (err) {
+        console.error("Worker failed:", err);
+        throw err;
       }
     },
     {
@@ -94,7 +83,7 @@ export function startPRReviewWorker() {
 
   worker.on("ready", () => {
     console.log("========================================");
-    console.log("PR Review Worker is READY");
+    console.log("BULLMQ WORKER READY");
     console.log("========================================");
   });
 
@@ -110,17 +99,17 @@ export function startPRReviewWorker() {
     );
   });
 
-  worker.on("failed", (job, error) => {
+  worker.on("failed", (job, err) => {
     console.error(
       `Worker failed job: ${job?.id}`,
-      error
+      err
     );
   });
 
-  worker.on("error", (error) => {
+  worker.on("error", (err) => {
     console.error(
-      "BullMQ Worker error:",
-      error
+      "BULLMQ WORKER ERROR:",
+      err
     );
   });
 

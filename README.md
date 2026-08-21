@@ -98,7 +98,7 @@ Contributions are welcome!
 Before opening a PR, please read:
 👉 [`docs/contribution.md`](docs/contribution.md)
 
----
+---HI There
 
 ## 📄 License
 

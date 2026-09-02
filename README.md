@@ -90,7 +90,7 @@ For full setup instructions:
 This project prioritizes **clarity, reliability, and scalability** over shortcuts.
 
 ---
-
+checking the project
 ## 🤝 Contributing
 
 Contributions are welcome!

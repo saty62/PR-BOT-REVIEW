@@ -5,7 +5,6 @@ export async function aiReview(patches: PatchesTypes[]) {
     return "## 🤖 AI Review\n\nNo code changes found in this PR.";
   }
 
-  // Build diff text
   let diffText = "";
 
   for (const patch of patches) {
@@ -31,7 +30,8 @@ Provide the review in GitHub Markdown with:
 6. Final Recommendation
 
 Be specific and practical.
-Only report genuine issues. Do not invent problems.
+Only report genuine issues.
+Do not invent problems.
 If a category has no issues, explicitly say "No issues found."
 
 Code diff:
@@ -41,60 +41,54 @@ ${diffText}
 
   try {
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "x-goog-api-key": process.env.GEMINI_API_KEY ?? "",
         },
-
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a senior software engineer specializing in code review, security, performance, and software engineering best practices.",
-            },
+          contents: [
             {
               role: "user",
-              content: prompt,
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
             },
           ],
         }),
       }
     );
 
-    // Get actual Groq error instead of only showing status code
     if (!response.ok) {
       const errorText = await response.text();
 
       throw new Error(
-        `Groq API error: ${response.status} - ${errorText}`
+        `Gemini API error: ${response.status} - ${errorText}`
       );
     }
 
     const data = await response.json();
 
     const aiText =
-      data?.choices?.[0]?.message?.content ??
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
       "AI review could not be generated.";
 
     return `## 🤖 AI Review\n\n${aiText}`;
   } catch (error) {
-    console.error("Groq API error:", error);
+    console.error("Gemini API error:", error);
 
     return `## 🤖 AI Review
 
 ❌ Failed to generate AI review.
 
 Please check:
-- GROQ_API_KEY
-- Groq model availability
-- API credits / limits
+- GEMINI_API_KEY
+- Gemini model availability
+- API quota / limits
 - Worker environment variables
 `;
   }
